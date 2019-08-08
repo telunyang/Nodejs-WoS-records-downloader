@@ -16,7 +16,7 @@ Using node.js to visit/parse/manipulate/download HTML elements of WoS with Selen
 - Download pages:
   - Linux or MacOS: [nvm](https://github.com/nvm-sh/nvm)
   - Windows: [nvm-windows](https://github.com/coreybutler/nvm-windows)
-  - Type following commands:
+  - Type commands as follows:
 ```sh
 $ nvm list # check you verisons of nvm
 $ nvm install 10.16.0 # install specific version of nvm
