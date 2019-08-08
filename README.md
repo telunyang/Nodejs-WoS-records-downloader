@@ -35,6 +35,9 @@ $ npm install --save
 4. Use your student ID, staff ID or E-mail account/password to connect to proper SSID in NTU.
 - Eg. NTU, ntu_peap, eduroam ... etc
 
+## Notice
+In our case, we use "chrome web driver" to manipulate HTML elements.
+
 ## Enjoy it!
 ```sh
 $ node examples/Journals/getRecords.js
