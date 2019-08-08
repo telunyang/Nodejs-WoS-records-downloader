@@ -1,0 +1,14 @@
+{
+  "name": "Nodejs-WoS-records-downloader",
+  "version": "1.0.0",
+  "description": "Using node.js to visit/parse/manipulate/download HTML elements of WoS with Selenium driver",
+  "main": "test.js",
+  "scripts": {
+    "run": "node examples/Journal/getRecords.js"
+  },
+  "author": "telunyang@gmail.com",
+  "license": "MIT",
+  "dependencies": {
+    "selenium-webdriver": "^4.0.0-alpha.4"
+  }
+}
