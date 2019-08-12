@@ -35,8 +35,51 @@ $ npm install --save
 4. Use your student ID, staff ID or E-mail account/password to connect to proper SSID in NTU.
 - Eg. NTU, ntu_peap, eduroam ... etc
 
+5. Check source of Journal Full Names: I made it as a json file and placed it within the path "json/arrSplitJournals.json"
+```
+[
+  [
+    "REVIEW OF EDUCATIONAL RESEARCH",
+    "EDUCATIONAL PSYCHOLOGIST",
+    "COMPUTERS & EDUCATION",
+    "Internet and Higher Education",
+    "Educational Research Review"
+  ],
+  [
+    "LEARNING AND INSTRUCTION",
+    "MODERN LANGUAGE JOURNAL",
+    "JOURNAL OF THE LEARNING SCIENCES",
+    "Educational Researcher",
+    "Comunicar"
+  ],
+  .
+  .
+  .
+  [
+    "ZEITSCHRIFT FUR PADAGOGIK",
+    "EDUCATIONAL LEADERSHIP",
+    "RIDE-The Journal of Applied Theatre and Performance",
+    "Zeitschrift fur Soziologie der Erziehung und Sozialisation",
+    "Pedagogische Studien"
+  ],
+  [
+    "Croatian Journal of Education-Hrvatski Casopis za Odgoj i obrazovanje",
+    "Cadmo",
+    "Curriculum Matters"
+  ]
+]
+```
+
 ## Notice
-In our case, we use "chrome web driver" to manipulate HTML elements.
+1. In our case, we use "chrome web driver" to manipulate HTML elements.
+2. Set absolute path string in "driver.setDownloadPath":
+```sh
+# At about 266 lines of "examples/Journal/getRecords.js"
+.
+.
+await driver.setDownloadPath('C:\\Users\\telun\\source\\repos\\Nodejs-WoS-records-downloader\\' + downloadPath + '\\' + index + '\\' + arrPageRange[i][0] + '_' + arrPageRange[i][1]);
+```
+I'm not sure if it has other proper settings for that, maybe we can give it other tries afterward.
 
 ## Enjoy it!
 ```sh
