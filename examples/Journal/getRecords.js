@@ -262,7 +262,7 @@ async function _downloadJournalPlaneTextFile(index){
                 await mkdir(downloadPath + '\\' + index + '\\' + arrPageRange[i][0] + '_' + arrPageRange[i][1]); //建立資料夾，以當前填寫的資料筆數（例如 1, 500）來作為資料夾名稱
             }
 
-            //設定下載路徑
+            //設定下載路徑 (注意! 這裡要設置絕對路徑，不然會報錯，但以後還是可以繼續嚐試設定相對路徑)
             await driver.setDownloadPath('C:\\Users\\telun\\source\\repos\\Nodejs-WoS-records-downloader\\' + downloadPath + '\\' + index + '\\' + arrPageRange[i][0] + '_' + arrPageRange[i][1]);
 
             console.log('C:\\Users\\telun\\source\\repos\\Nodejs-WoS-records-downloader\\' + downloadPath + '\\' + index + '\\' + arrPageRange[i][0] + '_' + arrPageRange[i][1]);
