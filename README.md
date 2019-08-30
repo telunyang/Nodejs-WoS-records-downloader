@@ -89,4 +89,4 @@ $ npm run
 ```
 
 ## Demo: YouTube Video (Partial results)
-[![Automatic downloading WoS records](https://i.ytimg.com/vi/RS3JLe1cUTY/hqdefault.jpg)](https://youtu.be/RS3JLe1cUTY "Automatic downloading WoS records")
+[![Automatic downloading WoS records](https://i.ytimg.com/vi/jQJagK8Fr28/hqdefault.jpg)](https://youtu.be/jQJagK8Fr28 "Automatic downloading WoS records")
