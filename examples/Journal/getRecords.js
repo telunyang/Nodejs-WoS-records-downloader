@@ -46,9 +46,9 @@ let arrJournals = []; //期刊名稱
 let arrSplitJournals = []; //將期刊每 n 個獨立組合成一個陣列，方便程式針對檢索集進行操作
 let beginYear = 2009; //時間範圍: 始期年份
 let endYear = 2018; //時間範圍: 終期年份
-let numArrSplit = 29; //最高 # 檢索數 
+let numArrSplit = 2; //最高 # 檢索數 
 let numResult = 0; //搜尋 #1 ~ #最高檢索數 的 Results 總數
-let downloadPath = `C:\\Users\\telun\\source\\repos\\Nodejs-Html-Parser\\downloads`; //Wos records 檔案下載路徑
+let downloadPath = `C:\\Users\\telun\\source\\repos\\Nodejs-WoS-records-downloader\\downloads`; //Wos records 檔案下載路徑
 let jsonPath = `json`; //json 檔案下載路徑
 let xlsxPath = `excels`; //excel 檔案放置路徑
 let arrPageRange = []; //[ [1, 500], [501, 1000], ... ] 等下載頁數範圍
@@ -232,8 +232,11 @@ async function _goToSearchResultPage() {
         //初始化
         arrPageRange = [];
 
+        //判斷查詢後歷史記錄編號，是否低於最高檢索數
+        let objIndexNum = await driver.findElements({css: 'table tbody tr[id^="set_"] td div.historyResults'});
+
         //取得當前檢索結果的小計
-        let div = await driver.findElement({css: 'table tbody tr[id^="set_' + (numArrSplit + 1) + '"] td div.historyResults'});
+        let div = await driver.findElement({css: 'table tbody tr[id^="set_' + objIndexNum.length + '"] td div.historyResults'});
         numResult = await div.getText();
         numResult = parseInt( numResult.replace(/\s|,/g,'') );
 
@@ -325,17 +328,12 @@ async function _downloadJournalPlaneTextFile(index){
 
             console.log(downloadPath + '\\' + index + '\\' + arrPageRange[i][0] + '_' + arrPageRange[i][1]);
 
-            await sleepRandomSeconds();
-            await sleepRandomSeconds();
-            await sleepRandomSeconds();
-
             //按下匯出鈕，此時等待下載，直到開始下載，才會往程式下一行執行
             await driver.findElement({css: 'button#exportButton'}).click();
 
             //關閉匯出視窗
             await driver.findElement({css: 'a.flat-button.quickoutput-cancel-action'}).click();
 
-            await sleepRandomSeconds();
             await sleepRandomSeconds();
             await sleepRandomSeconds();
             await sleepRandomSeconds();
