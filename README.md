@@ -20,9 +20,9 @@ Using node.js to visit/parse/manipulate/download HTML elements of WoS with Selen
   - Type commands as follows:
 ```sh
 $ nvm list # check you verisons of nvm
-$ nvm install 10.16.0 # install specific version of nvm
+$ nvm install 10.16.3 # install specific version of nvm
 ...
-$ nvm use 10.16.0
+$ nvm use 10.16.3
 $ nvm list # check current verison you're using
 ```
 
