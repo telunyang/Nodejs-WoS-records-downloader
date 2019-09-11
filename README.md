@@ -37,8 +37,23 @@ $ npm install --save
 - Eg. NTU, ntu_peap, eduroam ... etc
 
 5. Download JCR excel file with xlsx format and put it into **excels** folder. Please make it if the folder doesn't exist.
+- Visit JCR website: 
+  - [InCites Journal Citation Reports](https://jcr.clarivate.com/JCRLandingPageAction.action) 
+  - Notice: please make sure if you have authorization to access it.
+- Click "Browse by Categories".
+  - ![Click "Browse by Categories"](https://i.imgur.com/bHmJdpG.png "Click Browse by Categories")
+- Click what category you want.
+  - ![Click what category you want](https://i.imgur.com/hszaGTh.png "Click what category you want")
+- Click "Journals" link
+  - ![Click "Journals" link](https://i.imgur.com/yQHv5Gg.png "Click Journals link")
+- Check the words/title with border style
+  - ![Check the words/title with border style](https://i.imgur.com/0b8QTSx.png "Check the words/title with border style")
+- Click the download icon in the upper right corner and choose "XLS"
+  - ![Click the download icon in the upper right corner and choose "XLS"](https://i.imgur.com/AfVPPnc.png "Click the download icon in the upper right corner and choose XLS")
+- Preview excel file
+  - ![Preview excel file](https://i.imgur.com/r8PkJt1.png "Preview excel file")
 
-6. Check source of Journal Full Names: I made it as a json file and placed it within the path "json/arrSplitJournals.json"
+1. Check source of Journal Full Names: I made it as a json file and placed it within the path "json/arrSplitJournals.json"
 ```
 [
   [
