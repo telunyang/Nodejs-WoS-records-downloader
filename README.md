@@ -40,17 +40,17 @@ $ npm install --save
 - Visit JCR website: 
   - [InCites Journal Citation Reports](https://jcr.clarivate.com/JCRLandingPageAction.action) 
   - Notice: please make sure if you have authorization to access it.
-- Click "Browse by Categories".
+- Click "Browse by Categories":
   - ![Click "Browse by Categories"](https://i.imgur.com/bHmJdpG.png "Click Browse by Categories")
-- Click what category you want.
+- Click what category you want:
   - ![Click what category you want](https://i.imgur.com/hszaGTh.png "Click what category you want")
-- Click "Journals" link
+- Click "Journals" link:
   - ![Click "Journals" link](https://i.imgur.com/yQHv5Gg.png "Click Journals link")
-- Check the words/title with border style
+- Check the words/title with border style:
   - ![Check the words/title with border style](https://i.imgur.com/0b8QTSx.png "Check the words/title with border style")
-- Click the download icon in the upper right corner and choose "XLS"
+- Click the download icon in the upper right corner and choose "XLS":
   - ![Click the download icon in the upper right corner and choose "XLS"](https://i.imgur.com/AfVPPnc.png "Click the download icon in the upper right corner and choose XLS")
-- Preview excel file
+- Preview excel file:
   - ![Preview excel file](https://i.imgur.com/r8PkJt1.png "Preview excel file")
 
 1. Check source of Journal Full Names: I made it as a json file and placed it within the path "json/arrSplitJournals.json"
@@ -90,12 +90,12 @@ $ npm install --save
 
 ## Notice
 1. In our case, we use "chrome web driver" to manipulate HTML elements.
-2. Set absolute path string in "driver.setDownloadPath":
+2. Set absolute path string:
 ```sh
-# At about 266 lines of "examples/Journal/getRecords.js"
+# At about 51 lines of "examples/Journal/getRecords.js"
 .
 .
-await driver.setDownloadPath('C:\\Users\\telun\\source\\repos\\Nodejs-WoS-records-downloader\\' + downloadPath + '\\' + index + '\\' + arrPageRange[i][0] + '_' + arrPageRange[i][1]);
+let downloadPath = `C:\\Users\\telun\\source\\repos\\Nodejs-WoS-records-downloader\\downloads`; //Wos records 檔案下載路徑 (for Windows 10)
 ```
 I'm not sure if it has other proper settings for that, maybe we can give it other tries afterward.
 
