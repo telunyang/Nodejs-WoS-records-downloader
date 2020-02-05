@@ -88,17 +88,26 @@ async function init() {
 //將 excel 檔案特定內容取出後，以 json 格式儲存
 async function _xlsxToJson(){
     try{
+        let str = ''; //暫存文字用
+
         let workbook = XLSX.readFile(`${xlsxPath}\\${strJcrFileName}`); //讀取 excel 並建立物件
         let worksheet = workbook.Sheets[ workbook.SheetNames[0] ]; //取得 excel 第 1 個 sheet
-        let range = XLSX.utils.decode_range(worksheet['!ref']); //取得 excel 所有表格的範圍 eg. { s: { c: 0, r: 0 }, e: { c: 7, r: 93 } }
-        let str = '';
+
+        //取得 excel 所有表格的範圍 eg. { s: { c: 0, r: 0 }, e: { c: 7, r: 93 } }
+        let range = XLSX.utils.decode_range(worksheet['!ref']); 
+        
+        /**
+         * 1. range.s 代表 start; range.e 代表 end; 
+         * 2. range.s.r 代表 excel 檔案的 row; range.s.e 代表 excel 檔額的 column
+         * 3. c 跟 r 都從 0 開始，[c:0] 代表 A，[r:0] 代表 1，依此類推
+         */
         for(let rowNum = range.s.r; rowNum <= range.e.r; rowNum++){
             if(rowNum < 3 || rowNum > (range.e.r - 2) ) continue;
             cell = worksheet[ XLSX.utils.encode_cell({r: rowNum, c: 1}) ];
-            // console.log(cell.v);
-            str = cell.v;
-            str = str.trim();
-            arrJournals.push(str);
+            // console.log(cell.v); //印出儲存格中的值
+            str = cell.v; //將儲存格中的值，賦於 str 中，便於之後
+            str = str.trim(); //去除兩側空白
+            arrJournals.push(str); //陸續將儲存格中的值 (期刊名稱) 加入陣列中
         }
         
     } catch(err){
