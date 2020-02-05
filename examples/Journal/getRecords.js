@@ -7,33 +7,26 @@
  * 
  * */
 
-//
+//基本套件匯入
 const util = require('util');
 const fs = require('fs');
 const XLSX = require('xlsx');
 
-//引入瀏覽器
-const chrome = require('selenium-webdriver/chrome');
-
 //引入 selenium 功能
-const {Builder, By, Key, until, select} = require('selenium-webdriver');
+const {Builder, By, Key, until, Capabilities} = require('selenium-webdriver');
 
-//使用瀏覽器核心
-const driver = new Builder().forBrowser('chrome')
-.setChromeOptions(
-    new chrome.Options()
-    .addArguments([
-        '--disable-notifications',
-        '--disable-popup-blocking',
-        'User-Agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"',
-        'Accept="text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3"',
+//使用設定 chrome options
+const chromeCapabilities = Capabilities.chrome();
+const chromeOptions = {
+    'args': [
+        'User-Agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36"',
+        'Accept-Charset="utf-8"',
+        'Accept="text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"',
         'Accept-Language="zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7"'
-    ])
-)
-.build();
-
-//視窗放到最大
-// driver.manage().window().maximize();
+    ]
+};
+chromeCapabilities.set('chromeOptions', chromeOptions);
+const driver = new Builder().withCapabilities(chromeCapabilities).build();
 
 //將 fs 功能非同步化
 const exists = util.promisify(fs.exists);
@@ -48,12 +41,13 @@ let beginYear = 2009; //時間範圍: 始期年份
 let endYear = 2018; //時間範圍: 終期年份
 let numArrSplit = 2; //最高 # 檢索數 
 let numResult = 0; //搜尋 #1 ~ #最高檢索數 的 Results 總數
-let downloadPath = `C:\\Users\\telun\\source\\repos\\Nodejs-WoS-records-downloader\\downloads`; //Wos records 檔案下載路徑
-let jsonPath = `json`; //json 檔案下載路徑
-let xlsxPath = `excels`; //excel 檔案放置路徑
+let projectPath = `C:\\Users\\Owner\\Documents\\repo\\Nodejs-WoS-records-downloader`; //專案路徑 (絕對路徑)
+let downloadPath = `${projectPath}\\downloads`; //WoS records 檔案下載後放置路徑
+let jsonPath = `${projectPath}\\json`; //json 檔案下載路徑
+let xlsxPath = `${projectPath}\\excels`; //excel 檔案放置路徑
+let strJcrFileName = `JCRHomeGrid.xlsx`; //從 JCR 下載下來的 xlsx
 let arrPageRange = []; //[ [1, 500], [501, 1000], ... ] 等下載頁數範圍
 let urlWoS = `https://ntu.primo.exlibrisgroup.com/view/action/uresolver.do?operation=resolveService&package_service_id=6985762480004786&institutionId=4786&customerId=4785`; //WoS頁面
-
 
 //回傳隨機秒數，協助元素等待機制
 async function sleepRandomSeconds(){
@@ -70,28 +64,31 @@ async function sleepRandomSeconds(){
 async function init() {
     try{
         //output 資料夾不存在，就馬上建立
-        if (! await fs.existsSync('output') ){ 
-            await fs.mkdirSync('output'); //建立資料夾
+        if (! await fs.existsSync(`${projectPath}\\output`) ){ 
+            await fs.mkdirSync(`${projectPath}\\output`); //建立資料夾
         }
 
         //download 資料夾不存在，就馬上建立
-        if (! await fs.existsSync('downloads') ){ 
-            await fs.mkdirSync('downloads'); //建立資料夾
+        if (! await fs.existsSync(`${projectPath}\\downloads`) ){ 
+            await fs.mkdirSync(`${projectPath}\\downloads`); //建立資料夾
         }
 
         //json 資料夾不存在，就馬上建立
-        if (! await fs.existsSync('json') ){ 
-            await fs.mkdirSync('json'); //建立資料夾
+        if (! await fs.existsSync(`${projectPath}\\json`) ){ 
+            await fs.mkdirSync(`${projectPath}\\json`); //建立資料夾
         }
+
+        //視窗放到最大
+        // await driver.manage().window().maximize();
     } catch (err) {
         throw err;
     }
 }
 
 //將 excel 檔案特定內容取出後，以 json 格式儲存
-async function xlsxToJson(){
+async function _xlsxToJson(){
     try{
-        let workbook = XLSX.readFile(`${xlsxPath}\\JournalHomeGrid.xlsx`); //讀取 excel 並建立物件
+        let workbook = XLSX.readFile(`${xlsxPath}\\${strJcrFileName}`); //讀取 excel 並建立物件
         let worksheet = workbook.Sheets[ workbook.SheetNames[0] ]; //取得 excel 第 1 個 sheet
         let range = XLSX.utils.decode_range(worksheet['!ref']); //取得 excel 所有表格的範圍 eg. { s: { c: 0, r: 0 }, e: { c: 7, r: 93 } }
         let str = '';
@@ -109,16 +106,37 @@ async function xlsxToJson(){
     }
 }
 
+//設定期刊列表
+async function setArrJournals(){
+    try {
+        //自訂期刊列表(沒有自訂期刊到陣列中，會執行 _xlsxToJson()，從 xlsx 檔案取得期刊資訊)
+        arrSplitJournals = [];
+
+        //若沒初始設定期刊列表，則取得 JournalHomeGrid.xlsx 的期刊資料
+        if( arrSplitJournals.length === 0 ){
+            await _xlsxToJson();
+        }
+
+        //按下 WoS 的「進階搜尋」
+        await _goToAdvancedSearchPage() 
+    } catch (err) {
+        throw err;
+    }
+}
+
 //點選「進階檢索」連結
-async function goToAdvancedSearchPage(){
+async function _goToAdvancedSearchPage(){
     try{
         // let tabs = await driver.getAllWindowHandles();
         // await driver.switchTo().window(tabs[0]);
 
+        //前往 Web of Science 頁面
         await driver.get(urlWoS);
+
+        //等待「進階搜尋」的連結出現，再按下該連結
         await driver.wait(until.elementLocated({css: 'ul.searchtype-nav'}), 3000 );
         let li = await driver.findElements({css: 'ul.searchtype-nav li'});
-        await li[2].findElement({css: 'a'}).click();
+        await li[3].findElement({css: 'a'}).click();
     } catch (err) {
         throw err;
     }
@@ -170,21 +188,23 @@ async function _setDocumentType(type) {
 
 //將期刊每 n 個獨立組合成一個陣列，方便程式針對檢索集進行操作
 async function splitArrJournals(){
-    let arr = [];
-    for(let i = 0; i < arrJournals.length; i++) {
-        arr.push(arrJournals[i]);
-        if(arr.length % numArrSplit === 0){ //每 numArrSplit 個一組
-            arrSplitJournals.push(arr);
-            arr = []; //清除暫存用的陣列，讓方便整理下一個組合
-        } else if ( (i+1) === arrJournals.length ) { //未達 5 個，卻抵達最後一個元素，直接將剩下的組合在一起
-            arrSplitJournals.push(arr);
+    try{
+        let arr = [];
+        for(let i = 0; i < arrJournals.length; i++) {
+            arr.push(arrJournals[i]);
+            if(arr.length % numArrSplit === 0){ //每 numArrSplit 個一組
+                arrSplitJournals.push(arr);
+                arr = []; //清除暫存用的陣列，讓方便整理下一個組合
+            } else if ( (i+1) === arrJournals.length ) { //未達 numArrSplit 個，卻抵達最後一個元素，直接將剩下的組合在一起
+                arrSplitJournals.push(arr);
+            }
         }
-    }
 
-    //將期刊陣列，存放到檔案，協助測試
-    await writeFile(`${jsonPath}/arrSplitJournals.json`, JSON.stringify(arrSplitJournals, null, 2));
-    // console.dir(arrSplitJournals, {depth: null});
-    // console.log(`arrSplitJournals length: ${arrSplitJournals.length}`);
+        //將期刊陣列，存放到檔案，協助測試
+        await writeFile(`${jsonPath}/arrSplitJournals.json`, JSON.stringify(arrSplitJournals, null, 2));
+    } catch (err) {
+        throw err;
+    }
 }
 
 //整理檢索集，然後再度檢索
@@ -217,7 +237,7 @@ async function _collectSerialNumber(){
 //清除編號的歷史記錄
 async function _clearSerialNumberHistory() {
     try {
-        await goToAdvancedSearchPage();
+        await _goToAdvancedSearchPage();
         await driver.findElement({css: 'div.AdvSearchBox textarea'}).clear();
         await driver.findElement({css: 'button#selectallTop'}).click(); //歷史記錄列表全選
         await driver.findElement({css: 'button#deleteTop'}).click(); //刪除歷史記錄
@@ -274,7 +294,7 @@ async function _downloadJournalPlaneTextFile(index){
         //走訪選單連結文字，找到合適字串，就點按該連結，並跳出迴圈
         let multiple_li = await driver.findElements({css: 'ul#saveToMenu li.subnav-item'});
         for(let li of multiple_li){
-            if( await li.findElement({css: 'a'}).getText() === 'Other File Formats' ) {
+            if( ['Other File Formats', '其他檔案格式'].indexOf( await li.findElement({css: 'a'}).getText() ) !== -1 ) {
                 await li.findElement({css: 'a'}).click();
                 break;
             }
@@ -291,7 +311,7 @@ async function _downloadJournalPlaneTextFile(index){
                 //走訪選單連結文字，找到合適字串，就點按該連結，並跳出迴圈
                 let multiple_li = await driver.findElements({css: 'ul#saveToMenu li.subnav-item'});
                 for(let li of multiple_li){
-                    if( await li.findElement({css: 'a'}).getText() === 'Other File Formats' ) {
+                    if( ['Other File Formats', '其他檔案格式'].indexOf( await li.findElement({css: 'a'}).getText() ) !== -1) {
                         await li.findElement({css: 'a'}).click();
                         break;
                     }
@@ -334,6 +354,7 @@ async function _downloadJournalPlaneTextFile(index){
             //關閉匯出視窗
             await driver.findElement({css: 'a.flat-button.quickoutput-cancel-action'}).click();
 
+            //休閒一段時間
             await sleepRandomSeconds();
             await sleepRandomSeconds();
             await sleepRandomSeconds();
@@ -371,10 +392,10 @@ async function searchJournals() {
             }
             await _clearSerialNumberHistory(); //刪除搜尋的歷史記錄
 
-            // if( i >= 2 ) {
-            //     console.log(`程式展示完成`);
-            //     break;
-            // }
+            if( i >= 2 ) {
+                console.log(`程式展示完成`);
+                break;
+            }
         }
         
     } catch (err) {
@@ -398,9 +419,8 @@ async function asyncArray(functionsList) {
 try {
     asyncArray([
         init,
-        xlsxToJson,
-        goToAdvancedSearchPage, //按下 WoS 的「進階搜尋」
-        splitArrJournals, //將先前取得的 Full Journal Titles，依每 5 筆分組，例如 243 除以 5，整數為 48，餘數自成一組，共 49 組
+        setArrJournals,
+        splitArrJournals, //將先前取得的 Full Journal Titles，依每 numArrSplit 筆分組，例如 243 除以 5，整數為 48，餘數自成一組，共 49 組
         searchJournals, //陸續將 Journal Title 結合年份範圍，變成搜尋用字串，進行檢索
         close
     ]).then(async () => {
