@@ -37,14 +37,14 @@ const readFile = util.promisify(fs.readFile);
 //自訂變數
 let arrJournals = []; //期刊名稱
 let arrSplitJournals = []; //將期刊每 n 個獨立組合成一個陣列，方便程式針對檢索集進行操作
-let beginYear = 2009; //時間範圍: 始期年份
-let endYear = 2018; //時間範圍: 終期年份
+let beginYear = 2010; //時間範圍: 始期年份
+let endYear = 2019; //時間範圍: 終期年份
 let numArrSplit = 2; //最高 # 檢索數 
 let numResult = 0; //搜尋 #1 ~ #最高檢索數 的 Results 總數
-let projectPath = `C:\\Users\\Owner\\Documents\\repo\\Nodejs-WoS-records-downloader`; //專案路徑 (絕對路徑)
-let downloadPath = `${projectPath}\\downloads`; //WoS records 檔案下載後放置路徑
-let jsonPath = `${projectPath}\\json`; //json 檔案下載路徑
-let xlsxPath = `${projectPath}\\excels`; //excel 檔案放置路徑
+let projectPath = `/Users/sam/GoogleDrive/NodeJS/Nodejs-WoS-records-downloader`; //專案路徑 (絕對路徑)
+let downloadPath = `${projectPath}/downloads`; //WoS records 檔案下載後放置路徑
+let jsonPath = `${projectPath}/json`; //json 檔案下載路徑
+let xlsxPath = `${projectPath}/excels`; //excel 檔案放置路徑
 let strJcrFileName = `JCRHomeGrid.xlsx`; //從 JCR 下載下來的 xlsx
 let arrPageRange = []; //[ [1, 500], [501, 1000], ... ] 等下載頁數範圍
 let urlWoS = `https://ntu.primo.exlibrisgroup.com/view/action/uresolver.do?operation=resolveService&package_service_id=6985762480004786&institutionId=4786&customerId=4785`; //WoS頁面
@@ -64,18 +64,18 @@ async function sleepRandomSeconds(){
 async function init() {
     try{
         //output 資料夾不存在，就馬上建立
-        if (! await fs.existsSync(`${projectPath}\\output`) ){ 
-            await fs.mkdirSync(`${projectPath}\\output`); //建立資料夾
+        if (! await fs.existsSync(`${projectPath}/output`) ){ 
+            await fs.mkdirSync(`${projectPath}/output`); //建立資料夾
         }
 
         //download 資料夾不存在，就馬上建立
-        if (! await fs.existsSync(`${projectPath}\\downloads`) ){ 
-            await fs.mkdirSync(`${projectPath}\\downloads`); //建立資料夾
+        if (! await fs.existsSync(`${projectPath}/downloads`) ){ 
+            await fs.mkdirSync(`${projectPath}/downloads`); //建立資料夾
         }
 
         //json 資料夾不存在，就馬上建立
-        if (! await fs.existsSync(`${projectPath}\\json`) ){ 
-            await fs.mkdirSync(`${projectPath}\\json`); //建立資料夾
+        if (! await fs.existsSync(`${projectPath}/json`) ){ 
+            await fs.mkdirSync(`${projectPath}/json`); //建立資料夾
         }
 
         //視窗放到最大
@@ -90,7 +90,7 @@ async function _xlsxToJson(){
     try{
         let str = ''; //暫存文字用
 
-        let workbook = XLSX.readFile(`${xlsxPath}\\${strJcrFileName}`); //讀取 excel 並建立物件
+        let workbook = XLSX.readFile(`${xlsxPath}/${strJcrFileName}`); //讀取 excel 並建立物件
         let worksheet = workbook.Sheets[ workbook.SheetNames[0] ]; //取得 excel 第 1 個 sheet
 
         //取得 excel 所有表格的範圍 eg. { s: { c: 0, r: 0 }, e: { c: 7, r: 93 } }
@@ -345,17 +345,17 @@ async function _downloadJournalPlaneTextFile(index){
             await optionsFormat[3].click();
 
             //設定下載路徑，同時確認資料夾是否存在
-            if ( !await exists(downloadPath + '\\' + index) ) { 
-                await mkdir(downloadPath + '\\' + index); //建立資料夾，目前以分割期刊陣列的「索引」作為資料夾名稱
+            if ( !await exists(downloadPath + '/' + index) ) { 
+                await mkdir(downloadPath + '/' + index); //建立資料夾，目前以分割期刊陣列的「索引」作為資料夾名稱
             }
-            if ( !await exists(downloadPath + '\\' + index + '\\' + arrPageRange[i][0] + '_' + arrPageRange[i][1]) ) { 
-                await mkdir(downloadPath + '\\' + index + '\\' + arrPageRange[i][0] + '_' + arrPageRange[i][1]); //建立資料夾，以當前填寫的資料筆數（例如 1, 500）來作為資料夾名稱
+            if ( !await exists(downloadPath + '/' + index + '/' + arrPageRange[i][0] + '_' + arrPageRange[i][1]) ) { 
+                await mkdir(downloadPath + '/' + index + '/' + arrPageRange[i][0] + '_' + arrPageRange[i][1]); //建立資料夾，以當前填寫的資料筆數（例如 1, 500）來作為資料夾名稱
             }
 
             //設定下載路徑
-            await driver.setDownloadPath(downloadPath + '\\' + index + '\\' + arrPageRange[i][0] + '_' + arrPageRange[i][1]);
+            await driver.setDownloadPath(downloadPath + '/' + index + '/' + arrPageRange[i][0] + '_' + arrPageRange[i][1]);
 
-            console.log(downloadPath + '\\' + index + '\\' + arrPageRange[i][0] + '_' + arrPageRange[i][1]);
+            console.log(downloadPath + '/' + index + '/' + arrPageRange[i][0] + '_' + arrPageRange[i][1]);
 
             //按下匯出鈕，此時等待下載，直到開始下載，才會往程式下一行執行
             await driver.findElement({css: 'button#exportButton'}).click();
@@ -383,27 +383,46 @@ async function searchJournals() {
         let buffer = await readFile(`${jsonPath}/arrSplitJournals.json`);
         arrSplitJournals = JSON.parse(buffer);
 
-        //迭代期刊組合
-        for(let i = 0; i < arrSplitJournals.length; i++){ // 243 個期刊，每 5 個一組，約 49 組
-            for(let j = 0; j < arrSplitJournals[i].length; j++){ //走訪每一組的元素（範例是 5 個）
-                await _setFilterCondition(arrSplitJournals[i][j]); //整理搜尋用的字串
+        /**
+         * 若是從 xlsx 檔案中取得期刊種類，代表二維元素中 [0][0] 一定有長度大於 1 的字串
+         * 若字串長度小於等於 1，代表是單純定義一維陣列，從一維陣列元素中迭代使用期刊種類名稱
+         */
+        let str = String(arrSplitJournals[0][0]);
+        if(str.length > 1){
+            //迭代期刊組合
+            for(let i = 0; i < arrSplitJournals.length; i++){ // 243 個期刊，每 5 個一組，約 49 組
+                for(let j = 0; j < arrSplitJournals[i].length; j++){ //走訪每一組的元素（範例是 5 個）
+                    await _setFilterCondition(arrSplitJournals[i][j]); //整理搜尋用的字串
+                    await _setDocumentType('Article'); //選擇文件類型（目前設定 Article）
+                    await driver.findElement({css: 'button#search-button'}).click(); //按下搜尋
+                    
+                    //若是走訪到每一組的最後一個元素(例如第5元素)，就把目前 5 個檢索集編號整理起來，丟到搜尋欄位檢索出第 6 個結果
+                    if( (j+1) === arrSplitJournals[i].length){
+                        //查詢 5 個期刊，並取得查詢期刊總數，再進入期刊總數的連結
+                        await _collectSerialNumber(); //整理檢索集，然後再度檢索，最後把檢索歷史清空
+                        await driver.findElement({css: 'button#search-button'}).click(); //按下搜尋
+                        await _goToSearchResultPage(); //前往檢索結果的連結，範例是 #6
+                        await _downloadJournalPlaneTextFile(i); //迭代下載資料
+                    }
+                }
+                await _clearSerialNumberHistory(); //刪除搜尋的歷史記錄
+            }
+        } else {
+            //迭代自訂期刊
+            for(let i = 0; i < arrSplitJournals.length; i++){
+                await _setFilterCondition(arrSplitJournals[i]); //整理搜尋用的字串
                 await _setDocumentType('Article'); //選擇文件類型（目前設定 Article）
                 await driver.findElement({css: 'button#search-button'}).click(); //按下搜尋
                 
-                //若是走訪到每一組的最後一個元素(例如第5元素)，就把目前 5 個檢索集編號整理起來，丟到搜尋欄位檢索出第 6 個結果
-                if( (j+1) === arrSplitJournals[i].length){
+                //若是走訪最後一個元素(例如第5元素)，就把目前 5 個檢索集編號整理起來，丟到搜尋欄位檢索出第 6 個結果
+                if( (i+1) === arrSplitJournals.length){
                     //查詢 5 個期刊，並取得查詢期刊總數，再進入期刊總數的連結
                     await _collectSerialNumber(); //整理檢索集，然後再度檢索，最後把檢索歷史清空
                     await driver.findElement({css: 'button#search-button'}).click(); //按下搜尋
                     await _goToSearchResultPage(); //前往檢索結果的連結，範例是 #6
-                    await _downloadJournalPlaneTextFile(i); //迭代下載資料
+                    await _downloadJournalPlaneTextFile(i-1); //迭代下載資料
+                    await _clearSerialNumberHistory(); //刪除搜尋的歷史記錄
                 }
-            }
-            await _clearSerialNumberHistory(); //刪除搜尋的歷史記錄
-
-            if( i >= 2 ) {
-                console.log(`程式展示完成`);
-                break;
             }
         }
         
