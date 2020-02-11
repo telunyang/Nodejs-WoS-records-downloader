@@ -115,7 +115,7 @@ async function _xlsxToJson(){
     }
 }
 
-//設定期刊列表
+//設定期刊列表 
 async function setArrJournals(){
     try {
         /**
