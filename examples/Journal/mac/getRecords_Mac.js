@@ -118,7 +118,10 @@ async function _xlsxToJson(){
 //設定期刊列表
 async function setArrJournals(){
     try {
-        //自訂期刊列表(沒有自訂期刊到陣列中，會執行 _xlsxToJson()，從 xlsx 檔案取得期刊資訊)
+        /**
+         * 自訂期刊列表(沒有自訂期刊到陣列中，會執行 _xlsxToJson()，從 xlsx 檔案取得期刊資訊)
+         * 註: 請勿超過 29 個期刊種類
+         */
         arrSplitJournals = [];
 
         //若沒初始設定期刊列表，則取得 JournalHomeGrid.xlsx 的期刊資料
