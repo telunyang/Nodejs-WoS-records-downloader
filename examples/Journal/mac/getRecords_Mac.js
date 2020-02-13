@@ -174,6 +174,8 @@ async function _setFilterCondition(strJournalName){
         let strSO = `(SO=(${strJournalName}) and `;
         strSO += strPY;
         strSO += ')';
+
+        await driver.wait(until.elementLocated({css: 'div.AdvSearchBox textarea'}), 10000 );
         await driver.findElement({css: 'div.AdvSearchBox textarea'}).clear();
         await driver.findElement({css: 'div.AdvSearchBox textarea'}).sendKeys(strSO);
         await sleepRandomSeconds();
@@ -239,6 +241,7 @@ async function _collectSerialNumber(){
         strSearch += ')';
         
         //將整理完的編號字串，放到搜尋欄位查詢
+        await driver.wait(until.elementLocated({css: 'div.AdvSearchBox textarea'}), 10000 );
         await driver.findElement({css: 'div.AdvSearchBox textarea'}).clear();
         await driver.findElement({css: 'div.AdvSearchBox textarea'}).sendKeys(strSearch);
     } catch (err) {
@@ -250,6 +253,11 @@ async function _collectSerialNumber(){
 async function _clearSerialNumberHistory() {
     try {
         await _goToAdvancedSearchPage();
+
+        let html = await driver.getPageSource();
+        await writeFile(`${downloadPath}\\records.html`, html);
+
+        await driver.wait(until.elementLocated({css: 'div.AdvSearchBox textarea'}), 10000 );
         await driver.findElement({css: 'div.AdvSearchBox textarea'}).clear();
         await driver.findElement({css: 'button#selectallTop'}).click(); //歷史記錄列表全選
         await driver.findElement({css: 'button#deleteTop'}).click(); //刪除歷史記錄
@@ -364,6 +372,7 @@ async function _downloadJournalPlaneTextFile(index){
             await driver.findElement({css: 'button#exportButton'}).click();
 
             //關閉匯出視窗
+            await driver.wait(until.elementLocated({css: 'a.flat-button.quickoutput-cancel-action'}), 10000 );
             await driver.findElement({css: 'a.flat-button.quickoutput-cancel-action'}).click();
 
             //休閒一段時間
