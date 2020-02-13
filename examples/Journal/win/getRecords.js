@@ -11,6 +11,7 @@
 const util = require('util');
 const fs = require('fs');
 const XLSX = require('xlsx');
+const moment = require('moment');
 
 //引入 selenium 功能
 const {Builder, By, Key, until, Capabilities} = require('selenium-webdriver');
@@ -122,7 +123,7 @@ async function setArrJournals(){
          * 自訂期刊列表(沒有自訂期刊到陣列中，會執行 _xlsxToJson()，從 xlsx 檔案取得期刊資訊)
          * 註: 請勿超過 29 個期刊種類
          */
-        arrSplitJournals = [];
+        arrSplitJournals = ["ECONOMICS"];
 
         //若沒初始設定期刊列表，則取得 JournalHomeGrid.xlsx 的期刊資料
         if( arrSplitJournals.length === 0 ){
@@ -255,7 +256,33 @@ async function _clearSerialNumberHistory() {
         await _goToAdvancedSearchPage();
 
         let html = await driver.getPageSource();
-        await writeFile(`${downloadPath}\\records.html`, html);
+        await writeFile(`${downloadPath}\\${(new moment().format("YYYY-MM-DD HH:mm:ss"))}.html`, html);
+
+        let innerHeightOfWindow = 0;
+        let totalOffset = 0;
+        let sleepingMilliSecond = 1000 * 1;
+        while(totalOffset <= innerHeightOfWindow) {
+            totalOffset += 300;
+            await driver.executeScript(`
+            (
+                function (){
+                    window.scrollTo({ 
+                        top: ${totalOffset}, 
+                        behavior: "smooth" 
+                    });
+                }
+            )();
+            `);
+            innerHeightOfWindow = await driver.executeScript(`return window.innerHeight;`);
+            console.log(`totalOffset: ${totalOffset}, innerHeightOfWindow: ${innerHeightOfWindow}`);
+            await driver.sleep(sleepingMilliSecond);
+        }
+
+        //視窗放到最大
+        await driver.manage().window().maximize();
+
+        let raw_base64_image = await driver.takeScreenshot();
+        await writeFile(`${downloadPath}\\out.png`, raw_base64_image, 'base64');
 
         await driver.wait(until.elementLocated({css: 'div.AdvSearchBox textarea'}), 10000 );
         await driver.findElement({css: 'div.AdvSearchBox textarea'}).clear();
@@ -308,6 +335,7 @@ async function _downloadJournalPlaneTextFile(index){
         let firstExportFlag = false;
 
         //按下匯出鈕，跳出選單(網頁上有重複的元素，例如表格頭尾都有匯出鈕，這裡選擇一個來按)
+        await driver.wait(until.elementLocated({css: 'button#exportTypeName'}), 10000 );
         let buttonsExport = await driver.findElements({css: 'button#exportTypeName'});
         await buttonsExport[0].click();
 
@@ -432,7 +460,7 @@ async function searchJournals() {
                     await _collectSerialNumber(); //整理檢索集，然後再度檢索，最後把檢索歷史清空
                     await driver.findElement({css: 'button#search-button'}).click(); //按下搜尋
                     await _goToSearchResultPage(); //前往檢索結果的連結，範例是 #6
-                    await _downloadJournalPlaneTextFile(i-1); //迭代下載資料
+                    await _downloadJournalPlaneTextFile; //迭代下載資料
                     await _clearSerialNumberHistory(); //刪除搜尋的歷史記錄
                 }
             }
