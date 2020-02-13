@@ -256,7 +256,7 @@ async function _clearSerialNumberHistory() {
         await _goToAdvancedSearchPage();
 
         let html = await driver.getPageSource();
-        await writeFile(`${downloadPath}\\${(new moment().format("YYYY-MM-DD HH:mm:ss"))}.html`, html);
+        await writeFile(`${downloadPath}\\${(new moment().format("YYYYMMDDHHmmss"))}.html`, html);
 
         let innerHeightOfWindow = 0;
         let totalOffset = 0;
@@ -278,11 +278,11 @@ async function _clearSerialNumberHistory() {
             await driver.sleep(sleepingMilliSecond);
         }
 
-        //視窗放到最大
-        await driver.manage().window().maximize();
+        // //視窗放到最大
+        // await driver.manage().window().maximize();
 
-        let raw_base64_image = await driver.takeScreenshot();
-        await writeFile(`${downloadPath}\\out.png`, raw_base64_image, 'base64');
+        // let raw_base64_image = await driver.takeScreenshot();
+        // await writeFile(`${downloadPath}\\out.png`, raw_base64_image, 'base64');
 
         await driver.wait(until.elementLocated({css: 'div.AdvSearchBox textarea'}), 10000 );
         await driver.findElement({css: 'div.AdvSearchBox textarea'}).clear();
